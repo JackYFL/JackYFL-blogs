@@ -1,0 +1,873 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/JackYFL-blogs/img/prince.png">
+  <link rel="icon" href="/JackYFL-blogs/img/prince.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="JackYFL">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="This is the note of Berkeley CS285 taught by Sergey Levine. This lecture focuses on imitation learning with behavioral cloning (BC), why it can fail, and how DAgger addresses the key issue. Original s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS285 DRL Notes-Lecture 2 Supervised Learning of Behaviors">
+<meta property="og:url" content="https://jackyfl.github.io/JackYFL-blogs/2026/03/10/DRL-Berkeley-CS285-L2/index.html">
+<meta property="og:site_name" content="JackYFL">
+<meta property="og:description" content="This is the note of Berkeley CS285 taught by Sergey Levine. This lecture focuses on imitation learning with behavioral cloning (BC), why it can fail, and how DAgger addresses the key issue. Original s">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-03-10T18:26:12.633Z">
+<meta property="article:modified_time" content="2026-03-10T18:26:12.634Z">
+<meta property="article:author" content="JackYFL">
+<meta property="article:tag" content="DRL">
+<meta property="article:tag" content="CS285">
+<meta property="article:tag" content="imitation learning">
+<meta property="article:tag" content="behavioral cloning">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>CS285 DRL Notes-Lecture 2 Supervised Learning of Behaviors - JackYFL</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/JackYFL-blogs/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/JackYFL-blogs/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/JackYFL-blogs/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"jackyfl.github.io","root":"/JackYFL-blogs/","version":"1.9.8","typing":{"enable":true,"typeSpeed":60,"cursorChar":"_","loop":true,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/JackYFL-blogs/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/JackYFL-blogs/js/utils.js" ></script>
+  <script  src="/JackYFL-blogs/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/JackYFL-blogs/">
+      <strong>JackYFL</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/JackYFL-blogs/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/JackYFL-blogs/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>Archives</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/JackYFL-blogs/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/JackYFL-blogs/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Tags</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/JackYFL-blogs/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/JackYFL-blogs/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS285 DRL Notes-Lecture 2 Supervised Learning of Behaviors"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-03-10 18:26" pubdate>
+          March 10, 2026 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          306 words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          3 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Lecture Notes"
+        id="heading-96e5313097e0492920caaa1725da84e9" role="tab" data-toggle="collapse" href="#collapse-96e5313097e0492920caaa1725da84e9"
+        aria-expanded="true"
+      >
+        Lecture Notes
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-96e5313097e0492920caaa1725da84e9"
+           role="tabpanel" aria-labelledby="heading-96e5313097e0492920caaa1725da84e9">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/JackYFL-blogs/2026/03/08/DRL-Berkeley-CS285-L1/" title="CS285 DRL Notes-Lecture 1 Introduction"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">CS285 DRL Notes-Lecture 1 Introduction</span>
+        </a>
+      
+    
+      
+      
+        <a href="/JackYFL-blogs/2026/03/10/DRL-Berkeley-CS285-L2/" title="CS285 DRL Notes-Lecture 2 Supervised Learning of Behaviors"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">CS285 DRL Notes-Lecture 2 Supervised Learning of Behaviors</span>
+        </a>
+      
+    
+      
+      
+        <a href="/JackYFL-blogs/2026/03/10/DRL-Berkeley-CS285-L3/" title="CS285 DRL Notes-Lecture 3 Imitation Learning Models and Data"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">CS285 DRL Notes-Lecture 3 Imitation Learning Models and Data</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS285 DRL Notes-Lecture 2 Supervised Learning of Behaviors</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>This is the note of Berkeley <a target="_blank" rel="noopener" href="https://rail.eecs.berkeley.edu/deeprlcourse/"><strong>CS285</strong></a> taught by <a target="_blank" rel="noopener" href="https://people.eecs.berkeley.edu/~svlevine/"><strong>Sergey Levine</strong></a>. This lecture focuses on <strong>imitation learning</strong> with <strong>behavioral cloning (BC)</strong>, why it can fail, and how <strong>DAgger</strong> addresses the key issue. Original slides: <a target="_blank" rel="noopener" href="https://rail.eecs.berkeley.edu/deeprlcourse-fa23/static/slides/lec-2.pdf">CS285 Lecture 2 PDF</a>.</p>
+<h2 id="From-supervised-learning-to-imitation-learning"><a href="#From-supervised-learning-to-imitation-learning" class="headerlink" title="From supervised learning to imitation learning"></a>From supervised learning to imitation learning</h2><p>Lecture 2 starts from a familiar idea: treat policy learning as supervised learning.</p>
+<ul>
+<li>Collect expert demonstrations:<br>$$<br>\tau &#x3D; (o_1, a_1, o_2, a_2, \ldots, o_T, a_T)<br>$$</li>
+<li>Train a policy with maximum likelihood:<br>$$<br>\max_\theta \sum_{(o,a)\sim \mathcal{D}} \log \pi_\theta(a\mid o)<br>$$</li>
+<li>This is exactly <strong>behavioral cloning</strong>: map observation to action like a standard prediction problem.</li>
+</ul>
+<h3 id="Partially-observed-vs-fully-observed"><a href="#Partially-observed-vs-fully-observed" class="headerlink" title="Partially observed vs fully observed"></a>Partially observed vs fully observed</h3><p>The slide figure distinguishes two common setups:</p>
+<ul>
+<li><p><strong>Partially observed case</strong>: the policy acts on observations<br>$$<br>\pi_\theta(a_t\mid o_t)<br>$$<br>while the environment can be described with<br>$$<br>p(o_t\mid s_t),\quad p(s_{t+1}\mid s_t,a_t)<br>$$<br>where the true state $s_t$ is not directly available.</p>
+</li>
+<li><p><strong>Fully observed case</strong>: observation equals state, i.e., $o_t&#x3D;s_t$, so the policy is<br>$$<br>\pi_\theta(a_t\mid s_t)<br>$$<br>with dynamics<br>$$<br>p(s_{t+1}\mid s_t,a_t)<br>$$</p>
+</li>
+</ul>
+<p>In practical BC training, we usually only need supervised pairs $(o_t,a_t)$ (or $(s_t,a_t)$), without explicitly modeling $p(o_t\mid s_t)$ or $p(s_{t+1}\mid s_t,a_t)$.</p>
+<p>For action outputs:</p>
+<ul>
+<li><strong>Discrete actions</strong>: output logits &#x2F; class probabilities.</li>
+<li><strong>Continuous actions</strong>: output distribution parameters (e.g., Gaussian mean and variance).</li>
+</ul>
+<h2 id="Behavioral-cloning-algorithm"><a href="#Behavioral-cloning-algorithm" class="headerlink" title="Behavioral cloning algorithm"></a>Behavioral cloning algorithm</h2><p>Core pipeline:</p>
+<ol>
+<li>Ask an expert (human or oracle policy) to provide demonstration trajectories.</li>
+<li>Build dataset $\mathcal{D} &#x3D; {(o_i, a_i)}$.</li>
+<li>Train $\pi_\theta(a\mid o)$ with supervised learning.</li>
+<li>Deploy policy autoregressively in environment.</li>
+</ol>
+<p>This is simple and often effective in practice, and historically important (e.g., ALVINN for autonomous driving).</p>
+<p>Specifically, this pipeline can be written more explicitly:</p>
+<ul>
+<li>Dataset shape ($N$ trajectories, horizon $H$ each):<br>$$<br>\mathcal{D}&#x3D;\left{\left(o^{(i)}_1,a^{(i)}_1,\ldots,o^{(i)}_H,a^{(i)}<em>H\right)\right}</em>{i&#x3D;1}^N<br>$$</li>
+<li>Training objective (supervised learning &#x3D; maximum likelihood):<br>$$<br>\theta^\star&#x3D;\arg\max_\theta \sum_{i&#x3D;1}^N\sum_{t&#x3D;1}^H \log \pi_\theta!\left(a_t^{(i)}\mid o_t^{(i)}\right)<br>$$</li>
+</ul>
+<p>Implementation-wise, the policy first maps $o_t$ to action-distribution parameters (logits for discrete actions, distribution parameters for continuous actions), then produces $a_t$ (log-likelihood supervision during training; sampling or mean&#x2F;mode at inference).</p>
+<h2 id="Does-behavioral-cloning-work"><a href="#Does-behavioral-cloning-work" class="headerlink" title="Does behavioral cloning work?"></a>Does behavioral cloning work?</h2><p>Short answer from the lecture: <strong>sometimes yes, but not guaranteed</strong>.</p>
+<p>Why can it fail even when supervised training loss is low?</p>
+<ul>
+<li>Supervised learning relies on an i.i.d. assumption.</li>
+<li>In control, the model’s own actions affect future states.</li>
+<li>A small mistake can move the agent to unseen states.</li>
+<li>On unseen states, policy error increases, causing more drift.</li>
+</ul>
+<p>This is <strong>distributional shift</strong> (train-state distribution vs test-state distribution mismatch).</p>
+<h2 id="Why-errors-can-compound-with-horizon"><a href="#Why-errors-can-compound-with-horizon" class="headerlink" title="Why errors can compound with horizon"></a>Why errors can compound with horizon</h2><p>A key theoretical takeaway: BC error can scale poorly with trajectory length $T$.</p>
+<ul>
+<li>Let per-step mistake probability under training distribution be roughly $\epsilon$.</li>
+<li>Due to state distribution drift, total mistakes can grow much faster than $\epsilon T$.</li>
+<li>Worst-case analysis shows <strong>quadratic dependence</strong> on horizon (order $\mathcal{O}(T^2\epsilon)$).</li>
+</ul>
+<p>Intuition:</p>
+<ul>
+<li>Early mistake changes later inputs.</li>
+<li>Later predictions are made further off-distribution.</li>
+<li>This creates cascading failures in long-horizon control.</li>
+</ul>
+<h2 id="Pessimism-vs-reality"><a href="#Pessimism-vs-reality" class="headerlink" title="Pessimism vs reality"></a>Pessimism vs reality</h2><p>The lecture also points out the nuance:</p>
+<ul>
+<li>Worst-case analysis is pessimistic.</li>
+<li>Real systems sometimes recover from mistakes.</li>
+<li>But BC alone does not explicitly teach recovery unless recovery states appear in data.</li>
+</ul>
+<p>A practical paradox:</p>
+<ul>
+<li>Datasets containing some imperfect behavior + recoveries can sometimes make learned policies more robust.</li>
+</ul>
+<h2 id="Fixing-distributional-shift-DAgger"><a href="#Fixing-distributional-shift-DAgger" class="headerlink" title="Fixing distributional shift: DAgger"></a>Fixing distributional shift: DAgger</h2><p><strong>DAgger (Dataset Aggregation)</strong> addresses BC’s core issue by collecting data on states induced by the learned policy.</p>
+<p>High-level loop:</p>
+<ol>
+<li>Train initial policy on expert demonstrations.</li>
+<li>Roll out current policy to visit its own state distribution.</li>
+<li>Query expert action labels on those visited states.</li>
+<li>Aggregate new labeled data into dataset.</li>
+<li>Retrain policy and repeat.</li>
+</ol>
+<p>Why this helps:</p>
+<ul>
+<li>Training distribution becomes closer to deployment distribution.</li>
+<li>Policy learns what to do in states caused by its own mistakes.</li>
+<li>Theoretical guarantees are stronger than plain BC in sequential settings.</li>
+</ul>
+<h2 id="Practical-notes-from-this-lecture"><a href="#Practical-notes-from-this-lecture" class="headerlink" title="Practical notes from this lecture"></a>Practical notes from this lecture</h2><p>Besides DAgger, the lecture lists additional directions:</p>
+<ul>
+<li>Use stronger models to reduce per-step error.</li>
+<li>Improve data collection&#x2F;augmentation.</li>
+<li>Use multi-task training for broader state coverage.</li>
+</ul>
+<p>In real projects, BC is often the starting point, and DAgger-style relabeling&#x2F;online aggregation is a key upgrade for robustness.</p>
+<h2 id="My-takeaway"><a href="#My-takeaway" class="headerlink" title="My takeaway"></a>My takeaway</h2><ul>
+<li>BC is the most direct bridge from supervised learning to control.</li>
+<li>The i.i.d. assumption break is the central problem in imitation learning.</li>
+<li>Distributional shift is not a corner case; it is structural in closed-loop control.</li>
+<li>DAgger is important because it fixes the data distribution mismatch, not because it changes network architecture.</li>
+</ul>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li>Original lecture slides: <a target="_blank" rel="noopener" href="https://rail.eecs.berkeley.edu/deeprlcourse-fa23/static/slides/lec-2.pdf">CS285 Lecture 2: Supervised Learning of Behaviors (PDF)</a></li>
+<li>Ross, Gordon, and Bagnell. <a target="_blank" rel="noopener" href="https://proceedings.mlr.press/v15/ross11a.html"><em>A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning</em></a></li>
+<li>Ross et al. (2011), DAgger (Dataset Aggregation): <a target="_blank" rel="noopener" href="https://proceedings.mlr.press/v15/ross11a.html">paper page (same work)</a></li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/JackYFL-blogs/categories/Lecture-Notes/" class="category-chain-item">Lecture Notes</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/JackYFL-blogs/tags/DRL/" class="print-no-link">#DRL</a>
+      
+        <a href="/JackYFL-blogs/tags/CS285/" class="print-no-link">#CS285</a>
+      
+        <a href="/JackYFL-blogs/tags/imitation-learning/" class="print-no-link">#imitation learning</a>
+      
+        <a href="/JackYFL-blogs/tags/behavioral-cloning/" class="print-no-link">#behavioral cloning</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS285 DRL Notes-Lecture 2 Supervised Learning of Behaviors</div>
+      <div>https://jackyfl.github.io/JackYFL-blogs/2026/03/10/DRL-Berkeley-CS285-L2/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>JackYFL</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>March 10, 2026</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/JackYFL-blogs/2026/03/10/DRL-Berkeley-CS285-L3/" title="CS285 DRL Notes-Lecture 3 Imitation Learning Models and Data">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CS285 DRL Notes-Lecture 3 Imitation Learning Models and Data</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/JackYFL-blogs/2026/03/08/DRL-Berkeley-CS285-L1/" title="CS285 DRL Notes-Lecture 1 Introduction">
+                        <span class="hidden-mobile">CS285 DRL Notes-Lecture 1 Introduction</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/JackYFL-blogs/js/events.js" ></script>
+<script  src="/JackYFL-blogs/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/JackYFL-blogs/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/JackYFL-blogs/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/JackYFL-blogs/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

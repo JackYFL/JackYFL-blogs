@@ -1,0 +1,912 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/JackYFL-blogs/img/prince.png">
+  <link rel="icon" href="/JackYFL-blogs/img/prince.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="JackYFL">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="This is the note of the Berkeley CS285 course taught by Sergey Levine. This is the first lecture about the introduction of DRL. What is reinforcement learning? Mathematical formalism for learning-base">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS285 DRL Notes-Lecture 1 Introduction">
+<meta property="og:url" content="https://jackyfl.github.io/JackYFL-blogs/2026/03/08/DRL-Berkeley-CS285-L1/index.html">
+<meta property="og:site_name" content="JackYFL">
+<meta property="og:description" content="This is the note of the Berkeley CS285 course taught by Sergey Levine. This is the first lecture about the introduction of DRL. What is reinforcement learning? Mathematical formalism for learning-base">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://jackyfl.github.io/JackYFL-blogs/img/DRL-CS285-L1/SL-pipeline.png">
+<meta property="og:image" content="https://jackyfl.github.io/JackYFL-blogs/img/DRL-CS285-L1/RL-pipeline.png">
+<meta property="og:image" content="https://jackyfl.github.io/JackYFL-blogs/img/DRL-CS285-L1/RL-applications.png">
+<meta property="og:image" content="https://jackyfl.github.io/JackYFL-blogs/img/DRL-CS285-L1/data-optimization.png">
+<meta property="og:image" content="https://jackyfl.github.io/JackYFL-blogs/img/DRL-CS285-L1/learning-search.png">
+<meta property="og:image" content="https://jackyfl.github.io/JackYFL-blogs/img/DRL-CS285-L1/alan-turing.png">
+<meta property="article:published_time" content="2026-03-09T02:53:57.966Z">
+<meta property="article:modified_time" content="2026-03-09T02:53:57.966Z">
+<meta property="article:author" content="JackYFL">
+<meta property="article:tag" content="DRL">
+<meta property="article:tag" content="introduction">
+<meta property="article:tag" content="CS285">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://jackyfl.github.io/JackYFL-blogs/img/DRL-CS285-L1/SL-pipeline.png">
+  
+  
+  
+  <title>CS285 DRL Notes-Lecture 1 Introduction - JackYFL</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/JackYFL-blogs/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/JackYFL-blogs/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/JackYFL-blogs/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"jackyfl.github.io","root":"/JackYFL-blogs/","version":"1.9.8","typing":{"enable":true,"typeSpeed":60,"cursorChar":"_","loop":true,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/JackYFL-blogs/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/JackYFL-blogs/js/utils.js" ></script>
+  <script  src="/JackYFL-blogs/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/JackYFL-blogs/">
+      <strong>JackYFL</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/JackYFL-blogs/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/JackYFL-blogs/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>Archives</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/JackYFL-blogs/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/JackYFL-blogs/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Tags</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/JackYFL-blogs/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/JackYFL-blogs/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS285 DRL Notes-Lecture 1 Introduction"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-03-09 02:53" pubdate>
+          March 9, 2026 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          135 words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          2 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Lecture Notes"
+        id="heading-96e5313097e0492920caaa1725da84e9" role="tab" data-toggle="collapse" href="#collapse-96e5313097e0492920caaa1725da84e9"
+        aria-expanded="true"
+      >
+        Lecture Notes
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-96e5313097e0492920caaa1725da84e9"
+           role="tabpanel" aria-labelledby="heading-96e5313097e0492920caaa1725da84e9">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/JackYFL-blogs/2026/03/08/DRL-Berkeley-CS285-L1/" title="CS285 DRL Notes-Lecture 1 Introduction"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">CS285 DRL Notes-Lecture 1 Introduction</span>
+        </a>
+      
+    
+      
+      
+        <a href="/JackYFL-blogs/2026/03/10/DRL-Berkeley-CS285-L2/" title="CS285 DRL Notes-Lecture 2 Supervised Learning of Behaviors"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">CS285 DRL Notes-Lecture 2 Supervised Learning of Behaviors</span>
+        </a>
+      
+    
+      
+      
+        <a href="/JackYFL-blogs/2026/03/10/DRL-Berkeley-CS285-L3/" title="CS285 DRL Notes-Lecture 3 Imitation Learning Models and Data"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">CS285 DRL Notes-Lecture 3 Imitation Learning Models and Data</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS285 DRL Notes-Lecture 1 Introduction</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>This is the note of the Berkeley <a target="_blank" rel="noopener" href="https://rail.eecs.berkeley.edu/deeprlcourse/"><strong>CS285</strong></a> course taught by <a target="_blank" rel="noopener" href="https://people.eecs.berkeley.edu/~svlevine/"><strong>Sergey Levine</strong></a>. This is the first lecture about the introduction of DRL.</p>
+<h2 id="What-is-reinforcement-learning"><a href="#What-is-reinforcement-learning" class="headerlink" title="What is reinforcement learning?"></a>What is reinforcement learning?</h2><ul>
+<li><p>Mathematical formalism for learning-based decision making</p>
+</li>
+<li><p>Approach for learning decision making and control <strong>from experience</strong></p>
+</li>
+</ul>
+<h2 id="Difference-between-SL-and-RL"><a href="#Difference-between-SL-and-RL" class="headerlink" title="Difference between SL and RL?"></a>Difference between SL and RL?</h2><h3 id="Supervised-learning"><a href="#Supervised-learning" class="headerlink" title="Supervised learning"></a>Supervised learning</h3><ul>
+<li><p><strong>Input:</strong> $\mathbf{x}$  </p>
+</li>
+<li><p><strong>Output:</strong> $\mathbf{y}$  </p>
+</li>
+<li><p><strong>Data:</strong> $<br>\mathcal{D} &#x3D; {(x_i, y_i)}<br>$ <em>(someone gives this to you)</em>, learn to predict <strong>y</strong> from <strong>x</strong>: $f(x) \approx y$</p>
+<ul>
+<li><strong>Usually assumes</strong>:<ul>
+<li>i.i.d. data  </li>
+<li>Known ground truth outputs in training</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>Goal:</strong><br>$$<br>f_\theta(x_i) \approx y_i<br>$$</p>
+</li>
+</ul>
+<!-- 📊 **Pipeline**:   -->
+<p><img src="/JackYFL-blogs/img/DRL-CS285-L1/SL-pipeline.png" srcset="/JackYFL-blogs/img/loading.gif" lazyload alt="Supervised Learning"></p>
+<h3 id="Reinforcement-learning"><a href="#Reinforcement-learning" class="headerlink" title="Reinforcement learning"></a>Reinforcement learning</h3><ul>
+<li><strong>Input:</strong> $s_t$ at each time step  </li>
+<li><strong>Output:</strong> $a_t$ at each time step  </li>
+<li><strong>Data:</strong> $<br>(s_1, a_1, r_1, \ldots, s_T, a_T, r_T)<br>$ <em>(you pick your own actions)</em>  <ul>
+<li>Data is <strong>not i.i.d.</strong>: previous outputs influence future inputs!  </li>
+<li>Ground truth answer is not known, we only know if we succeeded or failed. More generally, we know the <strong>reward</strong></li>
+</ul>
+</li>
+<li><strong>Goal:</strong><br>$$<br>\text{learn } \pi_\theta : s_t \to a_t \quad<br>\text{to maximize } \sum_t r_t<br>$$</li>
+</ul>
+<!-- 📊 **Pipeline**:   -->
+<p><img src="/JackYFL-blogs/img/DRL-CS285-L1/RL-pipeline.png" srcset="/JackYFL-blogs/img/loading.gif" lazyload alt="Reinforcement Learning"></p>
+<h2 id="RL-applications"><a href="#RL-applications" class="headerlink" title="RL applications"></a>RL applications</h2><p>DRL can solve multiple complex tasks:</p>
+<ul>
+<li>Robots: complex physical tasks</li>
+<li>Games: chess, go, …</li>
+<li>Transportation</li>
+<li>Language: LLMs</li>
+<li>CV: image&#x2F;video generation</li>
+<li>Chip design</li>
+</ul>
+<p><img src="/JackYFL-blogs/img/DRL-CS285-L1/RL-applications.png" srcset="/JackYFL-blogs/img/loading.gif" lazyload alt="RL Applications"></p>
+<h2 id="Why-RL"><a href="#Why-RL" class="headerlink" title="Why RL"></a>Why RL</h2><ul>
+<li>RL can discover new solutions</li>
+<li><strong>Data</strong> without <strong>optimizaion</strong> doesn’t allow us to solve new problems in new way. Optimization without data is hard to apply to the real world outside of simulators</li>
+</ul>
+<p><img src="/JackYFL-blogs/img/DRL-CS285-L1/data-optimization.png" srcset="/JackYFL-blogs/img/loading.gif" lazyload alt="Data Optimization"></p>
+<p><img src="/JackYFL-blogs/img/DRL-CS285-L1/learning-search.png" srcset="/JackYFL-blogs/img/loading.gif" lazyload alt="Learning and Search"></p>
+<ul>
+<li><p>Why do we need <strong>machine learning</strong> anyway?</p>
+<ul>
+<li>We need ML for one reason and one reason only - that’s to produce adaptable and complex decisions</li>
+</ul>
+</li>
+<li><p><strong>Aside</strong>: Why do we need brains anyway?</p>
+<ul>
+<li>We have a brain for one reason and one reasononly – that’s to produce adaptable and complex movements. Movement is the only way we have affecting the world around us… I believe that to understand movement is to understand the whole brain. —Daniel Wolpert (knows quite a lot about brains)</li>
+</ul>
+</li>
+<li><p>Why should we study RL?</p>
+<ul>
+<li>Big end-to-end trained models work quite well!</li>
+<li>We have RL algorithms that we can feasibly combine with deep networks, and yet learning-based control in real-world settings remains a major open problem!</li>
+</ul>
+</li>
+</ul>
+<h2 id="Other-challenges-in-real-world-sequential-decision-making"><a href="#Other-challenges-in-real-world-sequential-decision-making" class="headerlink" title="Other challenges in real-world sequential decision making"></a>Other challenges in real-world sequential decision making</h2><ul>
+<li><p>Basic RL deals with maximizing rewards, while it is not the only problem that matters for sequential decision making!</p>
+<ul>
+<li>Learning reward functions from example (inverse RL)</li>
+<li>Transferring knowledge between domains (transfer learning, meta-learning)</li>
+<li>Learning to predict and using prediction to act</li>
+</ul>
+</li>
+<li><p>Other forms of supervision</p>
+<ul>
+<li>Learning from demonstrations: imitation learning<ul>
+<li>Directly copying observed behavior</li>
+<li>Inferring rewards from observed behavior (inverse RL)</li>
+</ul>
+</li>
+<li>Learning from observing the world<ul>
+<li>Learning to predict</li>
+<li>Unsupervised learning</li>
+</ul>
+</li>
+<li>Learning from other tasks<ul>
+<li>Transfer learning</li>
+<li>Meta-learning: learning to learn</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>Challenges</strong></p>
+<ul>
+<li>We have great methods for learning from huge amounts of data and great optimization methods for RL. We don’t (yet) have amazing methods that both use data and RL</li>
+<li>Humans can learn incredibly quickly, DRL are usually slow</li>
+<li>Human reuse past knowledge, transfer learning in RL is an open problem</li>
+<li>Not clear what the reward function should be</li>
+<li>Not clear what the role of prediction should be</li>
+</ul>
+</li>
+</ul>
+<h2 id="How-to-build-intelligent-machines"><a href="#How-to-build-intelligent-machines" class="headerlink" title="How to build intelligent machines?"></a>How to build intelligent machines?</h2><ul>
+<li><p>🧠 Learning as the basis of intelligence</p>
+<ul>
+<li>Some things we can all do (e.g., <strong>walking</strong>)  </li>
+<li>Some things we can only learn (e.g., <strong>driving a car</strong>)  </li>
+<li>We can learn a <strong>huge variety of things</strong>, including very difficult ones  </li>
+<li>Therefore, our learning mechanism(s) are likely powerful enough to do <strong>everything we associate with intelligence</strong>  </li>
+<li>⚡ But it may still be convenient to <em>hard-code a few really important bits</em></li>
+</ul>
+</li>
+<li><p>A single algorithm</p>
+<ul>
+<li>Interpret rich sensory inputs</li>
+<li>Choose complex actions</li>
+</ul>
+</li>
+<li><p>Why DRL?</p>
+<ul>
+<li>Deep &#x3D; scalable learning from large, complex datasets</li>
+<li>RL &#x3D; optimization</li>
+</ul>
+</li>
+</ul>
+<p><img src="/JackYFL-blogs/img/DRL-CS285-L1/alan-turing.png" srcset="/JackYFL-blogs/img/loading.gif" lazyload alt="Alan Turing"></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/JackYFL-blogs/categories/Lecture-Notes/" class="category-chain-item">Lecture Notes</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/JackYFL-blogs/tags/DRL/" class="print-no-link">#DRL</a>
+      
+        <a href="/JackYFL-blogs/tags/introduction/" class="print-no-link">#introduction</a>
+      
+        <a href="/JackYFL-blogs/tags/CS285/" class="print-no-link">#CS285</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS285 DRL Notes-Lecture 1 Introduction</div>
+      <div>https://jackyfl.github.io/JackYFL-blogs/2026/03/08/DRL-Berkeley-CS285-L1/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>JackYFL</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>March 9, 2026</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/JackYFL-blogs/2026/03/10/DRL-Berkeley-CS285-L2/" title="CS285 DRL Notes-Lecture 2 Supervised Learning of Behaviors">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CS285 DRL Notes-Lecture 2 Supervised Learning of Behaviors</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/JackYFL-blogs/2026/03/08/git-cheat-sheet/" title="Git Usage Guide">
+                        <span class="hidden-mobile">Git Usage Guide</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/JackYFL-blogs/js/events.js" ></script>
+<script  src="/JackYFL-blogs/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/JackYFL-blogs/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/JackYFL-blogs/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/JackYFL-blogs/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
